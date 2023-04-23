@@ -1,2 +1,2 @@
-# AVR
-Some pieces of code in C for AVR microcontrollers and usable for other MCUs as well.
+# SPI in AVR
+Piece of code in C to communicate microcontrollers using SPI without needing to use SS signal and only using addressing.
