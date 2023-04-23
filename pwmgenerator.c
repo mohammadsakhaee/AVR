@@ -1,10 +1,8 @@
-#include <mega32a.h>
+#include <mega32a.h> ///// or any other MCU you want
 
 
 
-// Declare your global variables here
 #define CHANNELS    PORTD
-
 #define High        0xff
 #define Low         0x00
 #define On          0xff
@@ -15,21 +13,28 @@
 #define received    0x55
 #define start       0xAA
 
+
+//////////////////////////////////////////////////////////////////////////////
+//  for slaves addresses that do not appear in the data series should be used.
+//  here a 16 bits addressing scheme is used.
+//////////////////////////////////////////////////////////////////////////////
 #define ADDRESSMSB  0xFB
 #define ADDRESSLSB  0xBF
-#define READCMD     0xFD
+
+
+#define READCMD     0xFD        
 #define TURNON      0xF1
 #define TURNOFF     0xF0
-#define DSBL_MISO   (DDRB.6=0)
-#define EN_MISO     (DDRB.6=1)
+#define DSBL_MISO   (DDRB.6=0)      ///// important part!
+#define EN_MISO     (DDRB.6=1)      ///// important part!
 #define ACK         0xAC  
 #define Yes         1
 #define No          0
 #define EOD         0xED
-#define CRCC        0xCC
+#define CRCC        0xCC            /// no need 
 #define NAC         0xEC
 
-unsigned char channel[8]={0,150,20,100,250,10,15,200};
+unsigned char channel[8]={0,150,20,100,250,10,15,200};              ///// test PWM output for simulation
 unsigned char MASK[8]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
 bit newData;
@@ -39,7 +44,7 @@ unsigned char DataIn[20],selected=0,index=0, chkNextForLSB=0;//MSB,OVF,
 // SPI interrupt service routine
 unsigned char CRC,i;
 
-unsigned char data,dataAvailable,buffer[20],addressValid,receiving;
+unsigned char data,dataAvailable,DataOut[20],addressValid,receiving;
 bit END=0,freeTime;
 
 
@@ -85,79 +90,39 @@ data=SPDR;
 // Place your code here
 if(chkNextForLSB)
     chkNextForLSB--;        
-if((data==ADDRESSMSB)&&(freeTime))//&&(!selected)  /////////////here
-    chkNextForLSB=2;                                 
-if((data==ADDRESSLSB) && (chkNextForLSB)){
+if((data==ADDRESSMSB)&&(freeTime))//&&(!selected)  ///////////// freeTime here: because of critical timing for my PWM project,
+    chkNextForLSB=2;                               ///////////// I decided to read SPI only on freetime of the slave. it is not
+if((data==ADDRESSLSB) && (chkNextForLSB)){         ///////////// a part of SPI communication. but part of my project.
     addressValid=Yes;
     index=0;
     selected=Yes;
     }
-if((addressValid)){             ///// write section
-    if(data==ADDRESSLSB)  
+if((addressValid)){             ///// writing section
+    if(data==ADDRESSLSB)        ///// while writing Master keeps writing slave's LSB address on SPI MOSI 
         {
-//        //////////////
-//        EN_MISO;
+        EN_MISO;
         receiving=No;
-//        SPDR=buffer[index];
-//        //buffer[10]+=buffer[index];
-//        //delay_us(10);
-//        index++;
-//        if(index==11){
-//            cntr++;
-//            if(cntr==10)
-//                cntr=0;
-//            for(i=0;i<10;i++)
-//                buffer[i]=0x00;
-//            if(cntr<=X)
-//                buffer[2] = 0x22;
-//            else
-//                buffer[2] = 0xAA;    
-//            
-//                    
-//            }
+        SPDR=DataOut[index];
+
         }
-    else{
+    else{                       /////// reading section
         if((selected)){
             if((data==EOD)){    //  ||(index==20)
-                //PORTC.0=1;
                 index=0;
                 selected=No;
-                //addressValid=No; 
-                if(receiving){
-                    for(i=1;i<11;i++)
-                    CRC+=DataIn[i];
-                    if((DataIn[12]==CRC)||(DataIn[12]==CRCC)){
-                        SPDR=ACK;
-                        for(i=1;i<9;i++)
-                            channel[i-1]=DataIn[i];
-                        }
-                    else{
-                        SPDR=NAC;
-                        }
-                    }
-                else
-                    SPDR=ACK;    
-                            
-                //delay_us(10);//
+                for(i=1;i<9;i++)                ////// 8 bytes store in PWM channels (or any number of data)
+                    channel[i-1]=DataIn[i];
+                SPDR=ACK;    
                 }
             receiving=Yes;
-            //selected=0;
-            //readSlave();
-            DataIn[index]=data;
+
+            DataIn[index]=data;             
             index++;
             //PORTC.0=0;
             }
         if(data==ACK){
             DSBL_MISO;//END=Yes;
-            //PORTC.0=0;
-//                    for(i=1,CRC=0;i<=10;i++)
-//                        CRC+=DataIn[i]; 
-//                    if(index==14)
-//                        if( CRC == DataIn[11] )
-//                            PORTC.0=0;
-//                    if(index==13)
-//                        if( (CRC==ACK)||(CRC==EOD)||(CRC==ADDRESSLSB) )
-//                    PORTC.0=0; 
+            addressValid=No;
             index=0;
             }
         }
@@ -296,7 +261,7 @@ while (1)
       {
       
       
-
+ //////////// this PWM section is a 8 channels radio controller simulator for a drone. with duty cycle of 10% maximum and 50Hz
     while((TCNT0>130)) {
         freeTime=No;
         // &&(TCNT0<255)
