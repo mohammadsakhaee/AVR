@@ -2,13 +2,13 @@
 This program was created by the
 CodeWizardAVR V3.12 Advanced
 Automatic Program Generator
-© Copyright 1998-2014 Pavel Haiduc, HP InfoTech s.r.l.
+Â© Copyright 1998-2014 Pavel Haiduc, HP InfoTech s.r.l.
 http://www.hpinfotech.com
 
-Project : 
+Project : Drone
 Version : 
 Date    : 2/19/2023
-Author  : 
+Author  : Mohammad Sakhaee
 Company : 
 Comments: 
 
@@ -47,7 +47,7 @@ Data Stack size         : 512
 #define LED         PORTB.0
 #define CRCC           0xCC
 #define clear(x)    x=0
-eeprom float f1=1280,f2=35.7393055,f3=50.9835041;
+eeprom float f1=1280,f2=35.699795,f3=51.3169342;            /////// #WomanLifeFreedom
 
 float temperature,pressure;
 
@@ -73,18 +73,7 @@ union FLOAT2CHAR tempData;
 // Declare your global variables here
 
 
-//// Timer1 overflow interrupt service routine
-//char Xntr=1;
-//interrupt [TIM1_OVF] void timer1_ovf_isr(void)
-//{
-//// Reinitialize Timer1 value
-//TCNT1H=0x85EE >> 8;
-//TCNT1L=0x85EE & 0xff;
-//// Place your code here
-//Xntr++;
-//if(Xntr==9)
-//    Xntr=1;
-//}
+
 // Timer1 overflow interrupt service routine
 char Xntr;
 interrupt [TIM1_OVF] void timer1_ovf_isr(void)
@@ -99,16 +88,9 @@ if(Xntr==7)
 }
 
 
-// SPI interrupt service routine
 unsigned char dataIn[20],dataOut[20];//// ,index=0;
 
-//interrupt [SPI_STC] void spi_isr(void)
-//{
-//data[index]=SPDR;
-//// Place your code here
-//if(index<9)
-//index++;
-//}
+
 
 
 char masterRead(unsigned int Address, unsigned char Qtt){
@@ -287,19 +269,12 @@ ADCSRA=(0<<ADEN) | (0<<ADSC) | (0<<ADATE) | (0<<ADIF) | (0<<ADIE) | (0<<ADPS2) |
 
 
 
-//// SPI initialization
-//// SPI Type: Master
-//// SPI Clock Rate: 250.000 kHz// 2*250.000 kHz
-//// SPI Clock Phase: Cycle Start
-//// SPI Clock Polarity: Low
-//// SPI Data Order: MSB First
-//SPCR=(0<<SPIE) | (1<<SPE) | (0<<DORD) | (1<<MSTR) | (0<<CPOL) | (0<<CPHA) | (1<<SPR1) | (0<<SPR0);
-//SPSR=(0<<SPI2X); /////1
+
 
 
 // SPI initialization
 // SPI Type: Master
-// SPI Clock Rate: 1000.000 kHz
+// SPI Clock Rate: 500.000 kHz
 // SPI Clock Phase: Cycle Start
 // SPI Clock Polarity: Low
 // SPI Data Order: MSB First
@@ -326,11 +301,8 @@ Xntr=1;
 while (1)
       {
       // Place your code here
-////////////////////////////////////////////      
-//        USERDATA=No;
-//        if(masterRead(CMDADDRESS,13))
-//            CMDDATA=Yes;
-////////////////////////////////////////////
+
+    
 
 ///////////////////////////////////////////        
       if(masterRead(SNSADDRESS,13))
@@ -363,94 +335,10 @@ while (1)
                 //LED=OFF;
                 } 
             }
-////////////////////////////////////////    
-//    tempData.value=home.lat;
-//    for(i=0;i<4;i++)
-//        dataOut[i]=tempData.B[i]; //2+i
-//        
-//    tempData.value=home.lon;
-//    for(i=0;i<4;i++)
-//        dataOut[i+4]=tempData.B[i];
-//        
-//    tempData.value=home.alt;
-//    for(i=0;i<4;i++)
-//        dataOut[i+8]=tempData.B[i]; 
-///////////////////////////////////////
-            
-///////////////////////////////////////
-//        if(CMDDATA){
-//            CMDDATA=No;
-//            for(i=0;i<4;i++)
-//                tempData.B[i]=dataIn[i]; //2+i
-//            target.lat=tempData.value;
-//            
-//            for(i=0;i<4;i++)
-//                tempData.B[i]=dataIn[4+i]; //6+i
-//            target.lon=tempData.value;
-//            
-//            for(i=0;i<4;i++)
-//                tempData.B[i]=dataIn[8+i]; //10+i
-//            target.alt=tempData.value;
-//            
-//            if(dataIn[12]==USERCMD){
-//                LED=ON;
-//                for(i=0;i<20;i++)
-//                    dataIn[i]=0;    
-//                f1=target.alt;
-//                delay_us(10);
-//                f2=target.lat;
-//                delay_us(10);
-//                f3=target.lon;
-//                delay_us(10);
-//                delay_ms(2000);
-//                LED=OFF;
-//                } 
-//            }
-//    
-//        tempData.value=home.lat;
-//        for(i=0;i<4;i++)
-//            dataOut[i]=tempData.B[i]; //2+i
-//        
-//        tempData.value=home.lon;
-//        for(i=0;i<4;i++)
-//            dataOut[i+4]=tempData.B[i];
-//        
-//        tempData.value=home.alt;
-//        for(i=0;i<4;i++)
-//            dataOut[i+8]=tempData.B[i];
-///////////////////////////////////////            
-            
-            
-//////////////////////////////////////////        
-//        for(i=0;i<15;i++)
-//            dataOut[i]='A'+i; 
-/////////////////////////////////////////
 
-//                temperature=21.5;
-//                pressure=120.5;
-//                target.alt=1200;
-//                
-//                tempData.value=temperature;
-//                for(i=0;i<4;i++)
-//                    dataOut[i]=tempData.B[i];
-//                    //tempData.B[i]=dataIn[i]; //2+i
-//                //temperature=tempData.value;
-//                tempData.value=pressure;
-//                for(i=0;i<4;i++)
-//                    dataOut[4+i]=tempData.B[i];
-//                    //tempData.B[i]=dataIn[4+i]; //6+i
-//                //pressure=tempData.value;
-//                
-//                tempData.value=target.alt;
-//                for(i=0;i<4;i++)
-//                    dataOut[8+i]=tempData.B[i];
-//                    //tempData.B[i]=dataIn[8+i]; //10+i
-//                //target.alt=tempData.value;
-                
    
 
         if(masterWrite(CMDADDRESS,12)){
-            //USERDATA=Yes;
             LED=ON;
             delay_ms(100);
             LED=OFF; 
@@ -458,8 +346,7 @@ while (1)
                
             
         delay_ms(50);
-        //LED = OFF;    
-            //}
+
         
         }  
       
