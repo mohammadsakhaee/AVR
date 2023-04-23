@@ -1,4 +1,4 @@
-# SPI without SS pin in AVR and other microcontrollers
+# SPI communication without SS pin in AVR and other microcontrollers
 Piece of code in C to communicate microcontrollers using SPI without needing to use SS signal and only using addressing.
 
 
